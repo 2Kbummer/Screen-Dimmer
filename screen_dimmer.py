@@ -7,12 +7,7 @@ from pynput.keyboard import Key, Listener, HotKey, Controller, GlobalHotKeys
 ICON = 'favicon.ico'
 GIT_URL = 'https://github.com/2Kbummer'
 
-hotkey = HotKey(HotKey.parse('<alt_r>+.'), print('Hotkey pressed!'))
-
-
 def main():
-    # TODO: make hotkeys work while window in background/tray; add link to github; compile to .exe; github
-
     text_color = ['Yellow', 'Orange', 'Blue', 'Black', 'Purple', 'Pink', 'Red']  # text color for monitor text that will be displayed
     Sg.change_look_and_feel('DarkTeal')  # theme for pysimplegui; look up theme names online
 
@@ -101,15 +96,6 @@ def key_lists():
         monitor_brightness_keys.append(f'monitor{i}_brightness')  # key for slider
         i += 1
     return monitor_count, monitor_names, current_monitors_brightness, monitor_brightness_keys, monitor_text_keys, monitor_text_list
-
-
-def write_event(key):
-    window.write_event_value(key, None)
-
-
-def hotkey_press():
-    with GlobalHotKeys({'<alt_r>+.': lambda key='Hotkey1': write_event(key)}) as listener:
-        listener.join()
 
 
 if __name__ == '__main__':
