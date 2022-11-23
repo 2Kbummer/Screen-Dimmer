@@ -2,7 +2,6 @@ import PySimpleGUI as Sg
 import screen_brightness_control as sbc
 from psgtray import SystemTray
 import threading
-from pynput.keyboard import Key, Listener, HotKey, Controller, GlobalHotKeys
 
 ICON = 'favicon.ico'
 GIT_URL = 'https://github.com/2Kbummer'
