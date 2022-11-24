@@ -1,13 +1,30 @@
-import PySimpleGUI as Sg
-import screen_brightness_control as sbc
-from psgtray import SystemTray
-import threading
+"""
+screen_dimmer.py
+-----------------------------------
+Summary:
+    This project allows users to change the brightness of their monitor(s).
+    This project uses PySimpleGUI as the gui. When closing window, will hide in system Tray. To quit press 'Exit' button
+    You can control each individual monitor's brightness with a slider with increments of 10 from 0-100% brightness
+    A OFF/ON button is added to disable sliders & make brightness %100
+    Also uses pynput for hotkey support which is 'Alt + z' to press OFF/ON button while minimized or in system tray
+"""
+
+import PySimpleGUI as Sg  # gui
+import screen_brightness_control as sbc  # brightness control
+from psgtray import SystemTray  # system tray
+import threading  # for hotkey
+from pynput.keyboard import GlobalHotKeys
+import webbrowser  # for url
 
 ICON = 'favicon.ico'
 GIT_URL = 'https://github.com/2Kbummer'
 
+
 def main():
+    # TODO: extras - save/load preset brightness, config file, github file structure
+
     text_color = ['Yellow', 'Orange', 'Blue', 'Black', 'Purple', 'Pink', 'Red']  # text color for monitor text that will be displayed
+    url_font = ('Arial', 10, 'underline')
     Sg.change_look_and_feel('DarkTeal')  # theme for pysimplegui; look up theme names online
 
     monitor_count, monitor_names, current_monitors_brightness, monitor_brightness_keys, monitor_text_keys, monitor_text_list = key_lists()
@@ -15,17 +32,24 @@ def main():
     menu = ['',
             ['Turn Off/On', '---', 'Show Window', 'Hide Window', 'Exit']]
     layout = [
-        [Sg.Text('Source @2kbummer Github'), Sg.Push(), Sg.Button('Quit', key='Exit')],
+        [Sg.Text('source @2kbummer github', key='github_link', text_color='Black', tooltip=GIT_URL, enable_events=True, font=url_font), Sg.Push(), Sg.Button('Exit', key='Exit')],
         [Sg.Text('Monitor Brightness Control', text_color='Dark Grey', font='BigFont')],
         [[[Sg.Text(monitor_text_list[i], key=monitor_text_keys[i], text_color=text_color[i])], [Sg.Slider(key=monitor_brightness_keys[i], orientation='horizontal', range=(0, 100), default_value=current_monitors_brightness[i], size=(100, 25), enable_events=True, resolution=10)]] for i in range(monitor_count)],
-        [Sg.Button('OFF/ON', key='off_on')],
-        [Sg.Text('OFF/ON HotKey =___right ALT + (.) period___')],
-        [Sg.Text('Pressing "X" on window hides window in System Tray')]
+        [Sg.Button('OFF/ON', key='off_on_button')],
+        [Sg.Text('[ ALT + z ]')]
     ]
 
     # Create the window
     window = Sg.Window('Screen Dimmer', layout, icon=ICON, resizable=True, element_justification='c', size=(350, 350), finalize=True, enable_close_attempted_event=True)  # Window Definition
-    window.bind("<Alt_R><.>", 'off_on')
+    window.bind("<Alt><z>", 'off_on_button')  # pressing alt + z, presses 'off_on' button
+
+    # function for hotkey listener to add it to 'target' argument in threading.Thread for syntax reasons
+    def hotkey_press_listener():
+        with GlobalHotKeys({'<alt>+z': lambda key='Hotkey': window.write_event_value(key, None)}) as listener:
+            listener.join()
+
+    # Thread for hotkey listener
+    threading.Thread(target=hotkey_press_listener, daemon=True).start()
 
     tooltip = 'Screen Dimmer'  # will show when hovering over icon in system tray
     tray = SystemTray(menu, single_click_events=False, window=window, icon=ICON, tooltip=tooltip)
@@ -39,6 +63,8 @@ def main():
             event = values[event]  # use the System Tray's event as if was from the window
         if event in (Sg.WIN_CLOSED, 'Exit'):
             break  # breaks while loop
+        if event == 'github_link':
+            webbrowser.open(GIT_URL)
         if event in ('Show Window', Sg.EVENT_SYSTEM_TRAY_ICON_DOUBLE_CLICKED):  # when in-tray, the 'show window' option or double-clicking icon will shows window
             window.un_hide()
             window.bring_to_front()
@@ -46,8 +72,8 @@ def main():
             window.hide()
             tray.show_icon()  # if hiding window, better make sure the icon is visible
 
-        # disabled button logic, every odd number of presses disables program
-        if event in ('off_on', 'Turn Off/On'):
+        # disabling button logic: every odd number of presses disables slider & makes brightness 100
+        if event in ('off_on_button', 'Turn Off/On', 'Hotkey'):
             disable_count += 1
         if disable_count % 2 == 1:  # num % 2 = 0 is even
             disable_brightness = True
@@ -66,7 +92,7 @@ def main():
                 window[monitor_text_keys[i]].update(final_brightness_text_list[i])  # updating displayed monitor text
                 sbc.set_brightness(values[monitor_brightness_keys[i]], display=i)  # setting brightness to slider values
 
-        # logic that make brightness 100% & disables slider when event to disable brightness triggered
+        # logic that makes brightness 100% & disables slider when event to disable brightness triggered
         elif disable_brightness:
             for k in range(monitor_count):
                 sbc.set_brightness(100, display=k)
