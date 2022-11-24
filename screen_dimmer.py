@@ -4,7 +4,7 @@ screen_dimmer.py
 Summary:
     This project allows users to change the brightness of their monitor(s).
     This project uses PySimpleGUI as the gui. When closing window, will hide in system Tray. To quit press 'Exit' button
-    You can control each individual monitor's brightness with a slider with increments of 10 from 0-100% brightness
+    You can control each individual monitor's brightness with a slider with a range from 0-100% brightness
     A OFF/ON button is added to disable sliders & make brightness %100
     Also uses pynput for hotkey support which is 'Alt + z' to press OFF/ON button while minimized or in system tray
 """
@@ -34,9 +34,8 @@ def main():
     layout = [
         [Sg.Text('source @2kbummer github', key='github_link', text_color='Black', tooltip=GIT_URL, enable_events=True, font=url_font), Sg.Push(), Sg.Button('Exit', key='Exit')],
         [Sg.Text('Monitor Brightness Control', text_color='Dark Grey', font='BigFont')],
-        [[[Sg.Text(monitor_text_list[i], key=monitor_text_keys[i], text_color=text_color[i])], [Sg.Slider(key=monitor_brightness_keys[i], orientation='horizontal', range=(0, 100), default_value=current_monitors_brightness[i], size=(100, 25), enable_events=True, resolution=10)]] for i in range(monitor_count)],
-        [Sg.Button('OFF/ON', key='off_on_button')],
-        [Sg.Text('[ ALT + z ]')]
+        [[[Sg.Text(monitor_text_list[i], key=monitor_text_keys[i], text_color=text_color[i])], [Sg.Slider(key=monitor_brightness_keys[i], orientation='horizontal', range=(0, 100), default_value=current_monitors_brightness[i], size=(100, 25), enable_events=True)]] for i in range(monitor_count)],
+        [Sg.Button('OFF/ON', key='off_on_button', tooltip='HotKey: Alt + z')]
     ]
 
     # Create the window
