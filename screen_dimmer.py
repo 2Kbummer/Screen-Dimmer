@@ -27,7 +27,7 @@ def main():
     url_font = ('Arial', 10, 'underline')
     Sg.change_look_and_feel('DarkTeal')  # theme for pysimplegui; look up theme names online
 
-    monitor_count, monitor_names, current_monitors_brightness, monitor_brightness_keys, monitor_text_keys, monitor_text_list = key_lists()
+    monitor_count, monitor_names, current_monitors_brightness, monitor_brightness_keys, monitor_text_keys, monitor_text_list = keys_and_lists()
 
     menu = ['',
             ['Turn Off/On', '---', 'Show Window', 'Hide Window', 'Exit']]
@@ -85,7 +85,7 @@ def main():
                 if len(brightness_values_list) == monitor_count:  # since constant adding of brightness values to list, need to 'reset' when length is more than monitor count
                     brightness_values_list = []
                     final_brightness_text_list = []
-                window.Element(monitor_brightness_keys[i]).update(disabled=False)  # if 'off_switch' checkbox active it disables slider, so this line resets it to make it active
+                window.Element(monitor_brightness_keys[i]).update(disabled=False)  # if 'off/on' button pressed it disables slider, so needs a reset to make it active again
                 brightness_values_list.append(values[monitor_brightness_keys[i]])  # values[] = making dictionary
                 final_brightness_text_list.append(f'Monitor {i + 1}: {monitor_names[i]} : {brightness_values_list[i]} %')
                 window[monitor_text_keys[i]].update(final_brightness_text_list[i])  # updating displayed monitor text
@@ -101,7 +101,7 @@ def main():
     window.close()
 
 
-def key_lists():
+def keys_and_lists():
     monitor_text_list = []  # list of the monitor texts that will be displayed; ex. "Monitor 1: ASUS-MAX56991 : 100%"
     monitor_text_keys = []  # list of keys of the monitor text; keys are used to identify the text (like an id)
     monitor_brightness_keys = []  # list of keys for the slider which gives us the value we want; ex. move slider to 50, then brightness will be 50
