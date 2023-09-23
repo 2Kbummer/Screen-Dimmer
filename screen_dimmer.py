@@ -110,14 +110,17 @@ def keys_and_lists():
     monitor_count = 0
     i = 0
     for monitor in sbc.list_monitors():
-        monitor_count += 1
         monitor_names.append(monitor)  # grabs monitor name from sbc.list_monitor
-        current_monitors_brightness.append(
-            *(sbc.get_brightness(display=monitor)))  # adds current brightness to empty list; * unpacks list
+        try:
+            current_monitors_brightness.append(
+                *(sbc.get_brightness(display=monitor)))  # adds current brightness to empty list; * unpacks list
+        except ScreenBrightnessError:  # if sbc cant identify brightness of monitor breaks loops to avoid error
+            continue  # breaks loop to start next iteration
         monitor_status = f'Monitor {i + 1}: {monitor_names[i]} : {sbc.get_brightness(display=monitor)} %'  # text that will be displayed on top of slider
         monitor_text_list.append(monitor_status)
         monitor_text_keys.append(f'monitor{i}_text')  # key for text
         monitor_brightness_keys.append(f'monitor{i}_brightness')  # key for slider
+        monitor_count += 1
         i += 1
     return monitor_count, monitor_names, current_monitors_brightness, monitor_brightness_keys, monitor_text_keys, monitor_text_list
 
